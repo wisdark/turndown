@@ -109,13 +109,27 @@ rules.fencedCodeBlock = {
   },
 
   replacement: function (content, node, options) {
-    var className = node.firstChild.className || ''
+    var className = node.firstChild.getAttribute('class') || ''
     var language = (className.match(/language-(\S+)/) || [null, ''])[1]
+    var code = node.firstChild.textContent
+
+    var fenceChar = options.fence.charAt(0)
+    var fenceSize = 3
+    var fenceInCodeRegex = new RegExp('^' + fenceChar + '{3,}', 'gm')
+
+    var match
+    while ((match = fenceInCodeRegex.exec(code))) {
+      if (match[0].length >= fenceSize) {
+        fenceSize = match[0].length + 1
+      }
+    }
+
+    var fence = repeat(fenceChar, fenceSize)
 
     return (
-      '\n\n' + options.fence + language + '\n' +
-      node.firstChild.textContent +
-      '\n' + options.fence + '\n\n'
+      '\n\n' + fence + language + '\n' +
+      code.replace(/\n$/, '') +
+      '\n' + fence + '\n\n'
     )
   }
 }
@@ -139,7 +153,8 @@ rules.inlineLink = {
 
   replacement: function (content, node) {
     var href = node.getAttribute('href')
-    var title = node.title ? ' "' + node.title + '"' : ''
+    var title = cleanAttribute(node.getAttribute('title'))
+    if (title) title = ' "' + title + '"'
     return '[' + content + '](' + href + title + ')'
   }
 }
@@ -155,7 +170,8 @@ rules.referenceLink = {
 
   replacement: function (content, node, options) {
     var href = node.getAttribute('href')
-    var title = node.title ? ' "' + node.title + '"' : ''
+    var title = cleanAttribute(node.getAttribute('title'))
+    if (title) title = ' "' + title + '"'
     var replacement
     var reference
 
@@ -237,12 +253,16 @@ rules.image = {
   filter: 'img',
 
   replacement: function (content, node) {
-    var alt = node.alt || ''
+    var alt = cleanAttribute(node.getAttribute('alt'))
     var src = node.getAttribute('src') || ''
-    var title = node.title || ''
+    var title = cleanAttribute(node.getAttribute('title'))
     var titlePart = title ? ' "' + title + '"' : ''
     return src ? '![' + alt + ']' + '(' + src + titlePart + ')' : ''
   }
+}
+
+function cleanAttribute (attribute) {
+  return attribute ? attribute.replace(/(\n+\s*)+/g, '\n') : ''
 }
 
 export default rules
