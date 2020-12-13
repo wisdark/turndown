@@ -1,16 +1,19 @@
 {
   "name": "turndown",
   "description": "A library that converts HTML to Markdown",
-  "version": "6.0.0",
+  "version": "7.0.1",
   "author": "Dom Christie",
   "main": "lib/turndown.cjs.js",
   "module": "lib/turndown.es.js",
   "jsnext:main": "lib/turndown.es.js",
   "browser": {
-    "jsdom": false
+    "domino": false,
+    "./lib/turndown.cjs.js": "./lib/turndown.browser.cjs.js",
+    "./lib/turndown.es.js": "./lib/turndown.browser.es.js",
+    "./lib/turndown.umd.js": "./lib/turndown.browser.umd.js"
   },
   "dependencies": {
-    "jsdom": "^16.2.0"
+    "domino": "^2.1.6"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^11.0.2",
